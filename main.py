@@ -78,6 +78,10 @@ elif mode == 'loading':
     # !trainning
     print(filepath_checkpoint)
     model.load_weights(filepath_checkpoint)
+    
+elif mode == 'load_pretrained':
+    #load pretrained model
+    model.load(filepath)
 
 print("*********Disaggregate*********")
 disag_filename = "disag-out.h5"
