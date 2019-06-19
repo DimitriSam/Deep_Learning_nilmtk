@@ -23,9 +23,10 @@ class NeuralDisaggregator(Disaggregator):
        the minimum length of an acceptable chunk
     '''
     
-    def __init__(self, model, window_size=100):
+    def __init__(self, model, name, window_size=100):
         '''Initialize disaggregator
         '''
+        self.MODEL_NAME = name
         self.MIN_CHUNK_LENGTH = window_size
         self.window_size = window_size
         self.model = model
