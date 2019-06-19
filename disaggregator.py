@@ -1,4 +1,17 @@
-class WindowDisaggregator(Disaggregator):
+from __future__ import print_function, division
+from warnings import warn, filterwarnings
+
+import random
+import sys
+import pandas as pd
+import numpy as np
+
+from nilmtk.disaggregate import Disaggregator
+from nilmtk.datastore import HDFDataStore
+
+from dataset_processing import normalise, inversenormalise
+
+class NeuralDisaggregator(Disaggregator):
     '''Attempt to create a RNN Disaggregator
 
     Attributes
@@ -13,7 +26,6 @@ class WindowDisaggregator(Disaggregator):
     def __init__(self, model, window_size=100):
         '''Initialize disaggregator
         '''
-        self.mmax = None
         self.MIN_CHUNK_LENGTH = window_size
         self.window_size = window_size
         self.model = model
@@ -48,11 +60,11 @@ class WindowDisaggregator(Disaggregator):
 
             timeframes.append(chunk.timeframe)
             measurement = chunk.name
-            chunk2 = self._normalize(chunk, self.mmax)
+            chunk2 = normalise(chunk)
 
             appliance_power = self.disaggregate_chunk(chunk2)
             appliance_power[appliance_power < 0] = 0
-            appliance_power = self._denormalize(appliance_power, self.mmax)
+            appliance_power = inversenormalise(appliance_power)
 
             # Append prediction to output
             data_is_available = True
