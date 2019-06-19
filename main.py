@@ -10,6 +10,7 @@ from nilmtk import DataSet, TimeFrame, MeterGroup, HDFDataStore
 from dataset_processing import load_dataset, data_processing
 from batch_generator import Batch_Generator
 from models import GRU_model, RNN_model, DAE_model, DresNET_model
+from disaggregator import NeuralDisaggregator
 import metrics
 
 from keras.callbacks import ModelCheckpoint
@@ -17,7 +18,7 @@ from keras.callbacks import ModelCheckpoint
 
 
 
-# =====Load Dataset======
+# =====Define paramaters======
 
 info = {'filename': 'ukdale.h5',
         'meter_label': 'kettle',  # ["kettle" , "microwave" , "dishwasher" , "fridge" , "washing_machine"]
@@ -25,7 +26,7 @@ info = {'filename': 'ukdale.h5',
         'test_building': 1,
         'sample_period': 6,
         'start_train': '13-4-2013', 'end_train': '13-6-2013',  # Define the time intervals of training and test data
-        'start_test': '1-1-2014', 'end_test': '30-1-2014'
+        'start_test': '1-1-2014', 'end_test': '30-6-2014'
         }
 
 # Parameters
@@ -34,6 +35,8 @@ params = {'batch_size': 128,
           'model_name': 'GRU',
           'shuffle': False}
 
+
+# =====Load Dataset======
 train_meterlist, train_mainlist, test_meterlist, test_mainlist = load_dataset(**info)
 
 train_x, train_y = data_processing(train_mainlist, train_meterlist, window_size=100, sample_period=6)
@@ -61,8 +64,12 @@ mode = 'training'
 
 # Training
 filepath_checkpoint = "UKDALE-RNN-h " + str(info['train_building']) + str(info['meter_label']) + ' epo.hdf5'
+filepath = 'UKDALE-RNN-h1-kettle-5epochs.h5'
 
-if mode == 'training':
+
+
+
+if mode == 'load_pretrained':
 
     print("*********Training*********")
     start = time.time()
@@ -75,16 +82,17 @@ if mode == 'training':
     print('### Total trainning time cost: {} ###'.format(str(end - start)))
 
 elif mode == 'loading':
-    # !trainning
+    # load checkpoints weights
     print(filepath_checkpoint)
     model.load_weights(filepath_checkpoint)
     
 elif mode == 'load_pretrained':
     #load pretrained model
-    model.load(filepath)
+    model = load_model(filepath)
 
 print("*********Disaggregate*********")
+disaggregator = NeuralDisaggregator(model)
 disag_filename = "disag-out.h5"
 output = HDFDataStore(disag_filename, 'w')
-disaggregator.disaggregate(test_mains, output, train_meter, sample_period=sample_period)
+disaggregator.disaggregate(test_mainlist, output, test_meterlist, sample_period = info['sample_period'])
 output.close()
