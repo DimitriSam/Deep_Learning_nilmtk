@@ -11,6 +11,7 @@ from dataset_processing import load_dataset, data_processing
 from batch_generator import Batch_Generator
 from models import GRU_model, RNN_model, DAE_model, DresNET_model
 from disaggregator import NeuralDisaggregator
+from keras.models import load_model
 import metrics
 
 from keras.callbacks import ModelCheckpoint
@@ -60,16 +61,15 @@ elif params['model_name'] == 'DAE':
 elif params['model_name'] == 'DresNET':
     model = DresNET_model(params['window_size'])
 
-mode = 'training'
 
 # Training
 filepath_checkpoint = "UKDALE-RNN-h " + str(info['train_building']) + str(info['meter_label']) + ' epo.hdf5'
 filepath = 'UKDALE-RNN-h1-kettle-5epochs.h5'
 
 
+mode = 'load_pretrained'
 
-
-if mode == 'load_pretrained':
+if mode == 'training':
 
     print("*********Training*********")
     start = time.time()
