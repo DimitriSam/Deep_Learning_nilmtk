@@ -9,15 +9,26 @@ class Batch_Generator():
         self.batch_size = batch_size
         self.shuffle = shuffle
         self.window_size = window_size
+        
+    def num_epochs(self, inputs):
+        
+        batch_size = int(self.batch_size / len(inputs))
+        num_of_batches = [(int(len(inputs[i]) / batch_size) - 1) for i in range(len(inputs))]
+        n_epochs = min(num_of_batches)
+        
+        return n_epochs
 
     def generator(self, inputs, targets):
 
         num_meters = len(inputs)
         batch_size = int(self.batch_size / num_meters)
-        num_of_batches = [(int(len(inputs[i]) / batch_size) - 1) for i in range(len(inputs))]
+        #num_of_batches = [(int(len(inputs[i]) / batch_size) - 1) for i in range(len(inputs))]
+        
+        n_epochs = self.num_epochs(inputs)
+        
 
         # Batch indexes
-        self.indexes = list(range(min(num_of_batches)))
+        self.indexes = list(range(n_epochs))
         if self.shuffle == True:
             np.random.shuffle(self.indexes)
 
