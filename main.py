@@ -24,10 +24,8 @@ info = {'filename': 'drive/My Drive/Dissertation/ukdale.h5',
         'meter_label': 'kettle',  # ["kettle" , "microwave" , "dishwasher" , "fridge" , "washing_machine"]
         'train_building': [1,2],
         'test_building': 5,
-        'sample_period': 6,
-        'start_train': '13-4-2013', 'end_train': '13-6-2013',  # Define the time intervals of training and test data
-        'start_test': '1-1-2014', 'end_test': '30-6-2014'
-        }
+        'sample_period': 6
+       }
 
 # Parameters
 params = {'batch_size': 128,
@@ -39,7 +37,7 @@ params = {'batch_size': 128,
 # =====Load Dataset======
 train_meterlist, train_mainlist, test_meterlist, test_mainlist = load_dataset(**info)
 
-train_x, train_y = data_processing(train_mainlist, train_meterlist, window_size=100, sample_period=6)
+train_x, train_y = data_processing(train_mainlist, train_meterlist, window_size=params['window_size'])
 
 # #Batch generator
 # gen = batch_generator(train_x, train_y,batch_size=128)
