@@ -15,21 +15,41 @@ import h5py
 
 
 
-def load_dataset(filename, meter_label, train_building, test_building,
-                 sample_period, start_train, end_train, start_test, end_test):
+def load_dataset(filename, meter_label, train_building, test_building, **load_kwargs):
+    
+    #Load datasets
     train = DataSet(filename)
     test = DataSet(filename)
 
-    train.set_window(start=start_train, end=end_train)
-    test.set_window(start=start_test, end=end_test)
-
+    #train.set_window(start=start_train, end=end_train)
+    test.set_window(start='1-1-2014', end='30-6-2014')
+    
+    #Define the training intervals for each house
+    window_per_house = {1: ("2013-04-16", "2013-04-18"), 
+                    2: ("2013-04-16", "2013-04-18"), 
+                    3: ('2013-02-27' , '2013-03-01 '), 
+                    4: ("2013-03-09", "2013-03-11"), 
+                    5: ("2014-06-29", None)}
+    
     # if only onw house is used for training
     # train_y = train.buildings[train_building].elec[meter_label]
     # train_x = train.buildings[train_building].elec.mains()
 
-    # multiple houses for training
-    train_meterlist = [train.buildings[i].elec[meter_label] for i in train_building]
-    train_mainlist = [train.buildings[i].elec.mains() for i in train_building]
+    train_mainlist = []
+    train_meterlist = []
+    for building_id, building in train.buildings.items():
+        if building_id in train_building:
+            train.clear_cache()
+            train.set_window(*window_per_house[building_id])
+            y = building.elec[meter_label]
+            x = building.elec.mains()
+            train_mainlist.append(x.power_series_all_data(**load_kwargs))
+            train_meterlist.append(y.power_series_all_data(**load_kwargs))
+            
+            
+#     # multiple houses for training
+#     train_meterlist = [train.buildings[i].elec[meter_label] for i in train_building]
+#     train_mainlist = [train.buildings[i].elec.mains() for i in train_building]
 
     test_meterlist = test.buildings[test_building].elec[meter_label]
     test_mainlist = test.buildings[test_building].elec.mains()
@@ -39,7 +59,7 @@ def load_dataset(filename, meter_label, train_building, test_building,
     return train_meterlist, train_mainlist, test_meterlist, test_mainlist
 
 
-def data_processing(train_mainlist, train_meterlist, window_size, **load_kwargs):
+def data_processing(train_mainlist, train_meterlist, window_size):
     '''Data processing
 
     Parameters
@@ -48,13 +68,13 @@ def data_processing(train_mainlist, train_meterlist, window_size, **load_kwargs)
     train_meterlist : a list of nilmtk.ElecMeter objects for the meter data of each building
     '''
 
-    train_x = [next(m.power_series(**load_kwargs)) for m in train_mainlist]
-    train_y = [next(m.power_series(**load_kwargs)) for m in train_meterlist]
+#     train_x = [m.power_series_all_data(**load_kwargs) for m in train_mainlist]
+#     train_y = [m.power_series_all_data(**load_kwargs) for m in train_meterlist]
 
     # mmax = max([m.max() for m in train_x])
     # Normalize the data
-    train_x = [normalise(data) for data in train_x]
-    train_y = [normalise(data) for data in train_y]
+    train_x = [normalise(data) for data in train_mainlist]
+    train_y = [normalise(data) for data in train_meterlist]
 
     # replca NaN values and
     for i in range(len(train_x)):
