@@ -30,7 +30,6 @@ info = {'filename': 'drive/My Drive/Dissertation/ukdale.h5',
 # Parameters
 params = {'batch_size': 128,
           'window_size': 100,
-          'num_epochs':1,
           'model_name': 'GRU',
           'shuffle': False}
 
@@ -80,16 +79,16 @@ if mode == 'training':
                                    verbose=1, save_best_only=True)
     model.fit_generator(t, 
                         steps_per_epoch = steps_epochs, 
-                        epochs=params['num_epochs'],
+                        epochs= 1,
                         use_multiprocessing=True,
                         workers=6, 
                         callbacks=[checkpointer])
 
     
     
-    model.save("UKDALE-{}-{}-{}-{}epochs.h5".format(params['model_name'], 
+    model.save("UKDALE-{}-{}-{}epochs.h5".format(params['model_name'], 
                                                      info['meter_label'],
-                                                      params['num_epochs']))
+                                                      1))
     
     end = time.time()
     print('### Total trainning time cost: {} ###'.format(str(end - start)))
@@ -112,8 +111,9 @@ output.close()
 
 
 print("========== RESULTS ============")
+meter_key = info['meter_label']
 result = DataSet(disag_filename)
-res_elec = result.buildings[test_building].elec
+res_elec = result.buildings[info['test_building'].elec
 rpaf = metrics.recall_precision_accuracy_f1(res_elec[meter_key], test_mainlist)
 print("============ Recall: {}".format(rpaf[0]))
 print("============ Precision: {}".format(rpaf[1]))
