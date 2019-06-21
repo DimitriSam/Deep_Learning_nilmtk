@@ -30,6 +30,7 @@ info = {'filename': 'drive/My Drive/Dissertation/ukdale.h5',
 # Parameters
 params = {'batch_size': 128,
           'window_size': 100,
+          'num_epochs':1,
           'model_name': 'GRU',
           'shuffle': False}
 
@@ -79,11 +80,17 @@ if mode == 'training':
                                    verbose=1, save_best_only=True)
     model.fit_generator(t, 
                         steps_per_epoch = steps_epochs, 
-                        epochs=1,
+                        epochs=params['num_epochs'],
                         use_multiprocessing=True,
                         workers=6, 
                         callbacks=[checkpointer])
 
+    
+    
+    model.save("UKDALE-{}-{}-{}-{}epochs.h5".format(params['model_name'], 
+                                                     info['meter_label'],
+                                                      params['num_epochs']))
+    
     end = time.time()
     print('### Total trainning time cost: {} ###'.format(str(end - start)))
 
@@ -102,3 +109,16 @@ disag_filename = "disag-out.h5"
 output = HDFDataStore(disag_filename, 'w')
 disaggregator.disaggregate(test_mainlist, output, test_meterlist, sample_period = info['sample_period'])
 output.close()
+
+
+print("========== RESULTS ============")
+result = DataSet(disag_filename)
+res_elec = result.buildings[test_building].elec
+rpaf = metrics.recall_precision_accuracy_f1(res_elec[meter_key], test_mainlist)
+print("============ Recall: {}".format(rpaf[0]))
+print("============ Precision: {}".format(rpaf[1]))
+print("============ Accuracy: {}".format(rpaf[2]))
+print("============ F1 Score: {}".format(rpaf[2]))
+
+print("============ Relative error in total energy: {}".format(metrics.relative_error_total_energy(res_elec[meter_key], test_mainlist)))
+print("============ Mean absolute error(in Watts): {}".format(metrics.mean_absolute_error(res_elec[meter_key], test_mainlist)))
