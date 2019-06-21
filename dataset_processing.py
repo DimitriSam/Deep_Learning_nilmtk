@@ -25,10 +25,10 @@ def load_dataset(filename, meter_label, train_building, test_building, **load_kw
     test.set_window(start='1-1-2014', end='30-6-2014')
     
     #Define the training intervals for each house
-    window_per_house = {1: ("2013-04-16", "2013-04-18"), 
-                    2: ("2013-04-16", "2013-04-18"), 
-                    3: ('2013-02-27' , '2013-03-01 '), 
-                    4: ("2013-03-09", "2013-03-11"), 
+    window_per_house = {1: ("2013-04-16", "2013-10-10"), 
+                    2: ("2013-04-16", "2013-10-10"), 
+                    3: ('2013-02-27' , '2013-04-08 '), 
+                    4: ("2013-03-09", "2013-10-01"), 
                     5: ("2014-06-29", None)}
     
     # if only onw house is used for training
@@ -162,27 +162,3 @@ def inversenormalise(data):
 
     return data * (max_v - mean) + mean
 
-
-def _create_model(self):
-    '''Creates the GRU architecture described in the paper
-    '''
-    model = Sequential()
-
-    # 1D Conv
-    model.add(Conv1D(16, 4, activation='relu', input_shape=(self.window_size, 1), padding="same", strides=1))
-
-    # Bi-directional GRUs
-    model.add(Bidirectional(GRU(64, activation='relu', return_sequences=True), merge_mode='concat'))
-    model.add(Dropout(0.5))
-    model.add(Bidirectional(GRU(128, activation='relu', return_sequences=False), merge_mode='concat'))
-    model.add(Dropout(0.5))
-
-    # Fully Connected Layers
-    model.add(Dense(128, activation='relu'))
-    model.add(Dropout(0.5))
-    model.add(Dense(1, activation='linear'))
-
-    model.compile(loss='mse', optimizer='adam')
-    print(model.summary())
-
-    return model
