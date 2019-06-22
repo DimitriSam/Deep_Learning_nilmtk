@@ -114,11 +114,11 @@ print("========== RESULTS ============")
 meter_key = info['meter_label']
 result = DataSet(disag_filename)
 res_elec = result.buildings[info['test_building'].elec
-rpaf = metrics.recall_precision_accuracy_f1(res_elec[meter_key], test_mainlist)
+rpaf = metrics.recall_precision_accuracy_f1(res_elec[meter_key], test_meterlist)
 print("============ Recall: {}".format(rpaf[0]))
 print("============ Precision: {}".format(rpaf[1]))
 print("============ Accuracy: {}".format(rpaf[2]))
 print("============ F1 Score: {}".format(rpaf[2]))
 
-print("============ Relative error in total energy: {}".format(metrics.relative_error_total_energy(res_elec[meter_key], test_mainlist)))
-print("============ Mean absolute error(in Watts): {}".format(metrics.mean_absolute_error(res_elec[meter_key], test_mainlist)))
+print("============ Relative error in total energy: {}".format(metrics.relative_error_total_energy(res_elec[meter_key], test_meterlist)))
+print("============ Mean absolute error(in Watts): {}".format(metrics.mean_absolute_error(res_elec[meter_key], test_meterlist)))
