@@ -39,7 +39,6 @@ def load_dataset(filename, meter_label, train_building, test_building, **load_kw
     train_meterlist = []
     for building_id, building in train.buildings.items():
         if building_id in train_building:
-            train.clear_cache()
             train.set_window(*window_per_house[building_id])
             y = building.elec[meter_label]
             x = building.elec.mains()
@@ -76,21 +75,16 @@ def data_processing(train_mainlist, train_meterlist, window_size):
     train_x = [normalise(data) for data in train_mainlist]
     train_y = [normalise(data) for data in train_meterlist]
 
-    # replca NaN values and
+    # replca NaN values parallell the timeframes
     for i in range(len(train_x)):
         train_x[i].fillna(0, inplace=True)
         train_y[i].fillna(0, inplace=True)
         ix = train_x[i].index.intersection(train_y[i].index)
-        # m1 = train_x[i]
-        # m2 = train_y[i]
-        # train_x[i] = m1[ix]
-        # train_y[i] = m2[ix]
-        train_x[i] = train_x[i][ix]
-        train_y[i] = train_y[i][ix]
+        
+        
+        train_x[i] = train_x[i][ix].values
+        train_y[i] = train_y[i][ix].values
 
-        indexer = np.arange(window_size)[None, :] + np.arange(len(train_x[i].values) - window_size + 1)[:, None]
-        train_x[i] = train_x[i].values[indexer]
-        train_y[i] = train_y[i].values[window_size - 1:]
 
     return train_x, train_y
 
