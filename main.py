@@ -20,7 +20,7 @@ from keras.callbacks import ModelCheckpoint
 
 # =====Define paramaters======
 
-info = {'filename': 'drive/My Drive/Dissertation/ukdale.h5',
+info = {'filename': 'ukdale.h5',
         'meter_label': 'kettle',  # ["kettle" , "microwave" , "dishwasher" , "fridge" , "washing_machine"]
         'train_building': [1,2],
         'test_building': 5,
@@ -33,9 +33,18 @@ params = {'batch_size': 128,
           'model_name': 'GRU',
           'shuffle': False}
 
+#Define the training intervals for each house
+window_per_house = {1: ("2013-04-13", "2013-04-20"), 
+                2: ("2013-04-16", "2013-10-10"), 
+                3: ('2013-02-27' , '2013-04-08 '), 
+                4: ("2013-03-09", "2013-10-01"), 
+                5: ("2014-06-29", None)}
+
+
+test_window = {1: ('1-1-2014', '1-6-2014')}
 
 # =====Load Dataset======
-train_meterlist, train_mainlist, test_meterlist, test_mainlist = load_dataset(**info)
+train_meterlist, train_mainlist, test_meterlist, test_mainlist = load_dataset(window_per_house,test_window, **info)
 
 train_x, train_y = data_processing(train_mainlist, train_meterlist, window_size=params['window_size'])
 
@@ -80,8 +89,8 @@ if mode == 'training':
     model.fit_generator(t, 
                         steps_per_epoch = steps_epochs, 
                         epochs= 1,
-                        use_multiprocessing=True,
-                        workers=6, 
+                        #use_multiprocessing=True,
+                        #workers=6,
                         callbacks=[checkpointer])
 
     
@@ -113,7 +122,7 @@ output.close()
 print("========== RESULTS ============")
 meter_key = info['meter_label']
 result = DataSet(disag_filename)
-res_elec = result.buildings[info['test_building'].elec
+res_elec = result.buildings[info['test_building']].elec
 rpaf = metrics.recall_precision_accuracy_f1(res_elec[meter_key], test_meterlist)
 print("============ Recall: {}".format(rpaf[0]))
 print("============ Precision: {}".format(rpaf[1]))
