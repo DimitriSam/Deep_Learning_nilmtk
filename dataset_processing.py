@@ -15,21 +15,14 @@ import h5py
 
 
 
-def load_dataset(filename, meter_label, train_building, test_building, **load_kwargs):
+def load_dataset(window_per_house, test_window, filename, meter_label, train_building, test_building, **load_kwargs):
     
     #Load datasets
     train = DataSet(filename)
     test = DataSet(filename)
 
     #train.set_window(start=start_train, end=end_train)
-    test.set_window(start='1-1-2014', end='30-6-2014')
-    
-    #Define the training intervals for each house
-    window_per_house = {1: ("2013-04-16", "2013-10-10"), 
-                    2: ("2013-04-16", "2013-10-10"), 
-                    3: ('2013-02-27' , '2013-04-08 '), 
-                    4: ("2013-03-09", "2013-10-01"), 
-                    5: ("2014-06-29", None)}
+    test.set_window(*test_window[test_building])
     
     # if only onw house is used for training
     # train_y = train.buildings[train_building].elec[meter_label]
