@@ -19,47 +19,49 @@ class Batch_Generator():
         return n_epochs
 
     def generator(self, inputs, targets):
-
-        num_meters = len(inputs)
-        batch_size = int(self.batch_size / num_meters)
-        #num_of_batches = [(int(len(inputs[i]) / batch_size) - 1) for i in range(len(inputs))]
         
-        n_epochs = self.num_epochs(inputs)
-        
-
-        # Batch indexes
-        self.indexes = list(range(n_epochs))
-        
-        if self.shuffle == True:
-            np.random.shuffle(self.indexes)
-
-        for ei, e in enumerate(self.indexes):
+        while True:
             
-            offset = e * batch_size
+            num_meters = len(inputs)
+            batch_size = int(self.batch_size / num_meters)
+            #num_of_batches = [(int(len(inputs[i]) / batch_size) - 1) for i in range(len(inputs))]
 
-            # Initialization
-            X_batch = np.zeros((batch_size * num_meters, self.window_size, 1))  # (128,100,1)
-            Y_batch = np.zeros((batch_size * num_meters, self.window_size))  # (128,1)
+            n_epochs = self.num_epochs(inputs)
 
-            # Create a batch out of data from all buildings
-            for i in range(num_meters):
-                mainpart = inputs[i]
-                meterpart = targets[i]
-                
-                indexer = np.arange(self.window_size)[None, :] + np.arange(len(inputs[i])-self.window_size+1)[offset:offset + batch_size, None]
-                
-                mainpart = mainpart[indexer]
-                meterpart = meterpart[indexer]
-                
-                X = np.reshape(mainpart, (batch_size, self.window_size, 1))
-                Y = np.reshape(meterpart, (batch_size,self.window_size))
 
-                X_batch[i * batch_size:(i + 1) * batch_size] = np.array(X)
-                Y_batch[i * batch_size:(i + 1) * batch_size] = np.array(Y)
+            # Batch indexes
+            self.indexes = list(range(n_epochs))
 
-            # Shuffle data
-            p = np.random.permutation(len(X_batch))
-            X_batch, Y_batch = X_batch[p], Y_batch[p]
-   
+            if self.shuffle == True:
+                np.random.shuffle(self.indexes)
 
-            yield X_batch, Y_batch
+            for ei, e in enumerate(self.indexes):
+
+                offset = e * batch_size
+
+                # Initialization
+                X_batch = np.zeros((batch_size * num_meters, self.window_size, 1))  # (128,100,1)
+                Y_batch = np.zeros((batch_size * num_meters, self.window_size))  # (128,1)
+
+                # Create a batch out of data from all buildings
+                for i in range(num_meters):
+                    mainpart = inputs[i]
+                    meterpart = targets[i]
+
+                    indexer = np.arange(self.window_size)[None, :] + np.arange(len(inputs[i])-self.window_size+1)[offset:offset + batch_size, None]
+
+                    mainpart = mainpart[indexer]
+                    meterpart = meterpart[indexer]
+
+                    X = np.reshape(mainpart, (batch_size, self.window_size, 1))
+                    Y = np.reshape(meterpart, (batch_size,self.window_size))
+
+                    X_batch[i * batch_size:(i + 1) * batch_size] = np.array(X)
+                    Y_batch[i * batch_size:(i + 1) * batch_size] = np.array(Y)
+
+                # Shuffle data
+                p = np.random.permutation(len(X_batch))
+                X_batch, Y_batch = X_batch[p], Y_batch[p]
+
+
+                yield X_batch, Y_batch
